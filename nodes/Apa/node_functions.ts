@@ -318,7 +318,7 @@ export class NodeFunctions {
       url: "https://gql.poolplayers.com/graphql",
       json: true,
       headers: {
-        authenticate: accessToken,
+        Authorization: accessToken,
       },
       body: {
         query,
@@ -360,6 +360,22 @@ export class NodeFunctions {
       );
     }
 
-    return response;
+    // Handle unknwon error
+    if (response.errors) {
+      throw new NodeOperationError(
+        executeFunctions.getNode(),
+        `Unknown graphql error: ${response.errors[0].name}:${response.errors[0].message}`
+      );
+    }
+
+    // Check that the response has a data property
+    if (!response.data) {
+      throw new NodeOperationError(
+        executeFunctions.getNode(),
+        "Response has no data property"
+      );
+    }
+
+    return response.data;
   }
 }

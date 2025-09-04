@@ -89,14 +89,47 @@ export class Apa implements INodeType {
                 name: "name",
                 type: "string",
                 default: "",
-                placeholder: "variableName",
+                placeholder: "name",
+              },
+              {
+                displayName: "Value Type",
+                name: "valueType",
+                type: "options",
+                options: [
+                  {
+                    name: "String",
+                    value: "string",
+                  },
+                  {
+                    name: "Number",
+                    value: "number",
+                  },
+                ],
+                default: "string",
               },
               {
                 displayName: "Value",
                 name: "value",
                 type: "string",
                 default: "",
-                placeholder: "variableValue",
+                placeholder: "value",
+                displayOptions: {
+                  show: {
+                    valueType: ["string"],
+                  },
+                },
+              },
+              {
+                displayName: "Value",
+                name: "value",
+                type: "number",
+                default: 0,
+                placeholder: "0",
+                displayOptions: {
+                  show: {
+                    valueType: ["number"],
+                  },
+                },
               },
             ],
           },
@@ -119,14 +152,19 @@ export class Apa implements INodeType {
         if (operation === "query") {
           const query = this.getNodeParameter("query", i) as string;
           const variablesParam = this.getNodeParameter("variables", i, {}) as {
-            variable: Array<{ name: string; value: string }>;
+            variable: Array<{ name: string; value: string | number; valueType: string }>;
           };
 
           // Process variables
           const variables: { [key: string]: any } = {};
           if (variablesParam.variable) {
             for (const variable of variablesParam.variable) {
-              variables[variable.name] = variable.value;
+              // Convert value based on the specified type
+              if (variable.valueType === "number") {
+                variables[variable.name] = Number(variable.value);
+              } else {
+                variables[variable.name] = variable.value;
+              }
             }
           }
 
